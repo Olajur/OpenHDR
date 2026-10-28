@@ -5,6 +5,14 @@ and runs nothing inside it; injected mode converts inside the game for the lowes
 Self-contained: no files in game folders, no replaced system DLLs, no ReShade or other third-party
 runtime, so it can sit next to mods such as OptiScaler (frame generation included).
 
+**[Download the latest release](https://github.com/Olajur/OpenHDR/releases/latest)** (installer or portable zip).
+
+![In-game settings panel with the split-screen compare: plain SDR on the left, converted on the right](docs/screenshots/ingame-panel.webp)
+
+| Game library | Settings and tray panel |
+|---|---|
+| ![Library with detected games, covers and per-game settings](docs/screenshots/library.webp) | ![Settings page and the tray panel](docs/screenshots/settings.webp) |
+
 Each game runs in one of two modes:
 
 | | Capture mode (default) | Injected mode (opt-in) |
