@@ -1,0 +1,16 @@
+# CMake build output (binaries, generated shader headers, installer payload)
+/build/
+
+# Visual Studio and editors
+.vs/
+*.user
+*.suo
+
+# Python caches (tools/)
+__pycache__/
+
+# Frame dumps written by the tools
+*.pfm
+
+# An empty clone of the remote that was created before the project folder itself became the repository
+/OpenHDR/
