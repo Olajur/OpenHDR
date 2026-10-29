@@ -173,9 +173,16 @@ bool IsTypeless(DXGI_FORMAT format) {
            format == DXGI_FORMAT_R10G10B10A2_TYPELESS;
 }
 
+// Whether a view of a proxy needs the game's format: no description, DXGI_FORMAT_UNKNOWN ("the
+// resource's format", e.g. Unreal Engine's back buffer view; on a typeless proxy that is invalid),
+// or the typeless format the proxy reports.
+bool NeedsProxyFormat(const DXGI_FORMAT* requested) {
+    return !requested || *requested == DXGI_FORMAT_UNKNOWN || IsTypeless(*requested);
+}
+
 // The game's back buffer format if `resource` is a proxy back buffer and the view needs it filled in.
 DXGI_FORMAT ProxyViewFormat(ID3D11Resource* resource, const DXGI_FORMAT* requested, bool& multisampled) {
-    if (!resource || (requested && !IsTypeless(*requested))) return DXGI_FORMAT_UNKNOWN;
+    if (!resource || !NeedsProxyFormat(requested)) return DXGI_FORMAT_UNKNOWN;
     DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN;
     UINT size = sizeof(format);
     if (FAILED(resource->GetPrivateData(kProxyFormatGuid, &size, &format)) || size != sizeof(format)) return DXGI_FORMAT_UNKNOWN;
@@ -261,7 +268,7 @@ using PFN_CreateRTV12 = void(STDMETHODCALLTYPE*)(ID3D12Device*, ID3D12Resource*,
 SlotHook s_CreateSRV12, s_CreateUAV12, s_CreateRTV12;
 
 DXGI_FORMAT ProxyViewFormat12(ID3D12Resource* resource, const DXGI_FORMAT* requested) {
-    if (!resource || (requested && !IsTypeless(*requested))) return DXGI_FORMAT_UNKNOWN;
+    if (!resource || !NeedsProxyFormat(requested)) return DXGI_FORMAT_UNKNOWN;
     DXGI_FORMAT format = DXGI_FORMAT_UNKNOWN;
     UINT size = sizeof(format);
     if (FAILED(resource->GetPrivateData(kProxyFormatGuid, &size, &format)) || size != sizeof(format)) return DXGI_FORMAT_UNKNOWN;

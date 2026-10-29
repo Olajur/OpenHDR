@@ -21,7 +21,7 @@ namespace openhdr::ui {
 
 using Microsoft::WRL::ComPtr;
 
-constexpr wchar_t kAppVersion[] = L"0.4.0";
+constexpr wchar_t kAppVersion[] = L"0.4.1";
 
 struct Theme {
     bool dark = true;

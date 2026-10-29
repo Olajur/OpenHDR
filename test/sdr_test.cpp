@@ -139,6 +139,7 @@ int main(int argc, char** argv) {
     bool hostileHooks = false;
     bool sceneTest = false;  // alternate a dark and a bright scene every 1.5 s (scene adaptation)
     bool srgbRtv = false;  // like Unity in linear colour space: an _SRGB view of the UNORM back buffer
+    bool unknownRtv = false;  // like Unreal Engine 4: a view description with DXGI_FORMAT_UNKNOWN (the resource's format)
     int maxFrames = 0;
     int gpuLoad = 1;  // draws per frame: keeps the GPU busy like a game (capture-mode pacing tests)
     for (int i = 1; i < argc; ++i) {
@@ -149,6 +150,7 @@ int main(int argc, char** argv) {
         else if (!strcmp(argv[i], "--hostile-hooks")) hostileHooks = true;
         else if (!strcmp(argv[i], "--scene-test")) sceneTest = true;
         else if (!strcmp(argv[i], "--srgb-rtv")) srgbRtv = true;
+        else if (!strcmp(argv[i], "--unknown-rtv")) unknownRtv = true;
         else if (!strcmp(argv[i], "--frames") && i + 1 < argc) maxFrames = atoi(argv[++i]);
         else if (!strcmp(argv[i], "--gpu-load") && i + 1 < argc) gpuLoad = (std::max)(atoi(argv[++i]), 1);
     }
@@ -251,9 +253,10 @@ int main(int argc, char** argv) {
         width = td.Width;
         height = td.Height;
         printf("Back buffer as seen by the app: %ux%u format %d\n", td.Width, td.Height, td.Format);
-        if (!srgbRtv) return device->CreateRenderTargetView(backBuffer.Get(), nullptr, &rtv);
+        if (!srgbRtv && !unknownRtv) return device->CreateRenderTargetView(backBuffer.Get(), nullptr, &rtv);
         D3D11_RENDER_TARGET_VIEW_DESC rd{};
-        rd.Format = flip && !unitySequence ? DXGI_FORMAT_B8G8R8A8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+        rd.Format = unknownRtv ? DXGI_FORMAT_UNKNOWN
+                    : flip && !unitySequence ? DXGI_FORMAT_B8G8R8A8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
         rd.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
         return device->CreateRenderTargetView(backBuffer.Get(), &rd, &rtv);
     };

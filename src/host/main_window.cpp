@@ -42,6 +42,7 @@ enum : int {
     kIdModeFirst = 40,  // + 0 off, 1 capture, 2 injected
     kIdChangeExe = 50,
     kIdOpenFolder,
+    kIdRemoveGame,
     kIdGamePicture = 100,      // picture settings of the selected game (+ kPic*)
     kIdDefaultPicture = 200,   // defaults for all games (+ kPic*)
     kIdHotkeyFirst = 300,      // + action: change
@@ -413,6 +414,10 @@ void MainWindow::DrawGamePanel(ui::Canvas& c, D2D1_RECT_F area) {
         c.Tip(kIdChangeExe, L"Pick the game's real process if this one is a launcher");
         c.Button(Rect(x + 216, y + 96, 92, 28), L"Folder", kIdOpenFolder, false, ui::glyph::kFolder);
         c.Tip(kIdOpenFolder, L"Open the install folder");
+    } else {
+        // Added by hand: no store lists it, so removing takes it out of the library completely.
+        c.Button(Rect(x + 100, y + 96, 110, 28), L"Remove", kIdRemoveGame, false, ui::glyph::kDelete);
+        c.Tip(kIdRemoveGame, L"Remove this game and its settings from OpenHDR");
     }
     y += 126 + 24;
 
@@ -660,6 +665,17 @@ void MainWindow::OnClick(int id) {
             case kIdPanelClose: selected_ = -1; break;
             case kIdChangeExe:
                 if (selected_ >= 0) ChangeExe(games_[selected_]);
+                break;
+            case kIdRemoveGame:
+                if (selected_ >= 0 && games_[selected_].store == L"Manual") {
+                    const std::wstring exe = games_[selected_].ExeName();
+                    SetMode(games_[selected_], GameMode::None);
+                    DeleteFileW((DataDir() + L"\\games\\" + exe + L".ini").c_str());  // its own settings
+                    WritePrivateProfileStringW(L"GameNames", ExeFileName(exe).c_str(), nullptr, GlobalIniPath().c_str());
+                    stores_.erase(exe);
+                    games_.erase(games_.begin() + selected_);
+                    selected_ = -1;
+                }
                 break;
             case kIdOpenFolder:
                 if (selected_ >= 0 && !games_[selected_].installDir.empty()) {

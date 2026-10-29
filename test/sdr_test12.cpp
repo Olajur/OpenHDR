@@ -1,11 +1,12 @@
 // Minimal D3D12 SDR renderer that exercises OpenHDR's injected mode without a real game.
 //
-//   sdr_test12 [--frames N] [--resize-test] [--srgb-rtv] [--null-rtv] [--load-library DLL] [--crash-after N] [--fake-fg]
+//   sdr_test12 [--frames N] [--resize-test] [--srgb-rtv] [--null-rtv] [--unknown-rtv] [--load-library DLL] [--crash-after N] [--fake-fg]
 //
 // Flip-model R8G8B8A8_UNORM swap chain with 3 buffers, drawing the same pattern as sdr_test.
 // --srgb-rtv: _SRGB render target views of the UNORM back buffers (what engines in linear colour
 // space do). --null-rtv: render target views created without a description (format from the
-// resource). With OpenHDR active, the printed descriptions must still show the SDR format.
+// resource). --unknown-rtv: descriptions with DXGI_FORMAT_UNKNOWN, as Unreal Engine creates them.
+// With OpenHDR active, the printed descriptions must still show the SDR format.
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
 #include <windows.h>
@@ -105,7 +106,7 @@ float SecondsSince(const LARGE_INTEGER& start) {
 }
 
 int main(int argc, char** argv) {
-    bool resizeTest = false, srgbRtv = false, nullRtv = false;
+    bool resizeTest = false, srgbRtv = false, nullRtv = false, unknownRtv = false;
     int maxFrames = 0;
     int crashAfter = 0;  // --crash-after N: an access violation after N frames (OpenHDR's crash log)
     bool fakeFg = false;
@@ -113,6 +114,7 @@ int main(int argc, char** argv) {
         if (!strcmp(argv[i], "--resize-test")) resizeTest = true;
         else if (!strcmp(argv[i], "--srgb-rtv")) srgbRtv = true;
         else if (!strcmp(argv[i], "--null-rtv")) nullRtv = true;
+        else if (!strcmp(argv[i], "--unknown-rtv")) unknownRtv = true;
         else if (!strcmp(argv[i], "--frames") && i + 1 < argc) maxFrames = atoi(argv[++i]);
         else if (!strcmp(argv[i], "--crash-after") && i + 1 < argc) crashAfter = atoi(argv[++i]);
         else if (!strcmp(argv[i], "--fake-fg")) fakeFg = true;
@@ -227,7 +229,7 @@ int main(int argc, char** argv) {
             D3D12_CPU_DESCRIPTOR_HANDLE handle = rtvHeap->GetCPUDescriptorHandleForHeapStart();
             handle.ptr += size_t(i) * rtvStride;
             D3D12_RENDER_TARGET_VIEW_DESC rd{};
-            rd.Format = srgbRtv ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM;
+            rd.Format = unknownRtv ? DXGI_FORMAT_UNKNOWN : srgbRtv ? DXGI_FORMAT_R8G8B8A8_UNORM_SRGB : DXGI_FORMAT_R8G8B8A8_UNORM;
             rd.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
             device->CreateRenderTargetView(backBuffers[i].Get(), nullRtv ? nullptr : &rd, handle);
         }
