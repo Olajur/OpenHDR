@@ -185,7 +185,7 @@ makes a viewable preview. `OPENHDR_OSD_OPEN=1` starts with the panel open; for t
 - Injected mode with frame generation mods (OptiScaler's XeFG): the frame generation hands the game a
   swap chain of its own and presents to one it creates inside the game's call. With `libxess_fg.dll`
   loaded, OpenHDR converts that inner swap chain instead, so generated frames are converted too
-  (tested with a stand-in layer, `sdr_test12 --fake-fg`; not yet confirmed in a real game).
+  (confirmed in Cyberpunk 2077 with OptiScaler's XeFG; `sdr_test12 --fake-fg` is a stand-in for tests).
   `OutputFormat=hdr10` makes injected mode output 10-bit HDR10 instead of FP16, for layers that only
   accept 8/10-bit swap chains.
 - Elevated (admin) games need `OpenHDR.exe` to run elevated too. 32-bit games need a 32-bit build
